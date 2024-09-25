@@ -62,4 +62,11 @@ The adaptive controller demonstrated significant improvements in navigation perf
 1. Clone the repository:
    ```bash
    git clone https://github.com/zcccc-keven/adaptive-controller-for-jackal.git
-    ```bash
+    ```
+
+2. Install any additional dependencies and make:
+   ```bash
+   pip install -r requirements.txt
+   catkin_make
+   source devel/setup.bash
+    ```
