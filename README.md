@@ -1,4 +1,4 @@
-# Adaptive Controller for Jackal
+# Adaptive Controller for Jackal Robot Navigation
 
 ## Description
 
