@@ -1,0 +1,200 @@
+source ../../devel/setup.sh
+source ../../devel/setup.bash
+python3 run_teb.py --world_idx 11 --gui 
+
+
+source ../../devel/setup.bash
+roslaunch jackal_gazebo jackal_world.launch config:=front_laser
+
+ cd src/the-barn-challenge/
+source ../../devel/setup.bash
+python3 run.py --world_idx 111 --gui
+
+roslaunch jackal_helper gazebo_view.launch
+
+
+source ../../devel/setup.bash
+roslaunch jackal_helper gazebo_launch.launch
+
+
+ cd src/the-barn-challenge/
+source ../../devel/setup.bash
+python3 run_teb_g.py --world_idx 0 --gui
+
+
+
+source ../../devel/setup.bash
+python3 run_dwa_g.py --world_idx 12 --gui
+
+
+
+
+hence i wanna train a network to improve the performance of the controller.
+ since 一次规划轨迹 = 一次velocity输出
+车子不能完美准确的执行规划器输出(for example, 命令走 1 米但只走了 0.7 米)
+ i decide to 将规划和控制两个线程分开, 让一次规划对应多次控制(such as 以 10Hz 规划,50Hz 跟踪控制):有误差的时候,第一次走少了,第二次就多走一点(弥补先前缺失的部分,move faster).
+ the method is here: 开发自适应的控制器,设置控制率,用网络去跟踪规划器,给一个速度指令为输入,输出速度,代替原来速度,用一层网络(深度学习)做速度处理
+好处:对于每个车不同的误差,都可以实现提高成功率(for robot move slower in the traditional controller, this network generate a higher velocity to it compared to the original, vice versa)
+Specifically: what the robot actually do is different to what the teb planning want it to do, so when movebase 开始规划, tEB 会往外发一个 cmd velocity 的话题,i want to train a neutral network that will output the amount needed added to the (velocity, angular velocity)
+ to the robot, and publish the sum of the original teb action and additional amount to the robot, in order to let the robot's action exactly same as what the teb want it to do,进网络,再输出,让小车收到.
+神经网络输入:速度,激光雷达, 目标点,强化学习不要直接输出速度,输出增量(amount that velocity need to increase), Reward:预期目标和真实目标的差别.
+
+finally: 强化学习框架
+
+
+source ~/jackal_ws1/venv/bin/activate
+cd ~/apple_ws
+source ~/jackal_ws1/devel/setup.bash
+roslaunch td3_controller td3_navigation.launch
+
+
+ source venv/bin/activate
+ cd src/the-barn-challenge/TD3/
+ python train_td3.py --policy TD3 --env CustomEnv-v0 --seed 0 --start_timesteps 25000 --eval_freq 5000 --max_timesteps 1000000 --save_model
+
+
+source ~/jackal_ws1/devel/setup.bash
+roslaunch jackal_helper train_controller.launch
+
+source venv/bin/activate
+source ~/jackal_ws1/devel/setup.bash
+cd ~/jackal_ws1/src/the-barn-challenge/TD3
+python train_nav.py --policy TD3 --env CustomEnv-v1 --seed 0 --start_timesteps 25000 --eval_freq 5000 --max_timesteps 1000000 --save_model
+
+
+
+git add .
+git commit -m "Initial commit of the adaptive controller workspace"
+git push -u origin master
+
+zzcccc-keven
+
+
+previously, i first launch file and the train the adaptive contoller under my environment in order to solve the issue that sometimes robot will no move exactly as what the TEB planner asked it to do
+
+now, pls combine the navigation file，and the train file， i want to train the robot ”s controller while navigating in this specific world（mentioned in a launch file） from gazebo pose （ -2.25，3 ） to （-1.5，9.22）, once the robot successfully reached (-1.5 9.22), it reset to （ -2.25，3 ） while continue training
+
+specifically i want the code to train a neutral network that will add a certain amount（either positive or negative） to cmd_vel published by TEB planner， then publish this velocity to the robot. Also， while in training step process， robot stop until recieve comand ，then move, in order to avoid signal transfer delay.
+The goal is to train this network using TD3 so that the actual twist of the robot completed is exactly same to what teb want the robot do（similar to the environment reward function，compare expected action and actual action）
+d
+
+source venv/bin/activate
+source /jackal_ws/devel/setup.bash
+cd /jackal_ws/src/the-barn-challenge/TD3
+python train_nav.py --policy TD3 --env CustomEnv1-v0 --seed 0 --start_timesteps 25000 --eval_freq 5000 --max_timesteps 1000000 --save_model
+
+
+
+well, i think during the navigation training, the robot should just do what teb ask it to do,
+after it performed this action at current timestep. then at next timestep, based on: the
+ comparison between what the teb  twist command sent to robot and the actual action that the
+ robot perform" in the last timestep, give a correction added to original twist teb want to
+  publish now , do you understand?
+
+
+explain what is meant by this:Action: [1. 1.], Reward: -0.3884582281112671, Done: False, State: (364,)
+Computed reward: -0.3885880708694458 for expected action: [1. 1.], actual action: [ 1.5301372e-05 -3.2325403e-04]
+Collision check: False, Min scan distance: 0.2959299683570862, Threshold: 0.2
+Not done
+
+source venv/bin/activate
+source ~/jackal_ws1/devel/setup.bash
+cd ~/jackal_ws1/src/the-barn-challenge/TD3
+python train_nav.py --policy TD3 --env CustomEnv1-v0 --seed 0 --start_timesteps 25000 --eval_freq 5000 --max_timesteps 1000000 --save_model
+
+source venv/bin/activate
+source ~/jackal_ws1/devel/setup.bash
+cd ~/jackal_ws1/src/the-barn-challenge
+python3 run_test1.py --world_idx 62 --gui --laser
+
+
+cd ~/jackal_ws1/src/the-barn-challenge
+source ../../devel/setup.bash
+python3 run_test10.py --laser
+
+source venv/bin/activate
+source ~/jackal_ws1/devel/setup.bash
+cd ~/jackal_ws1/src/the-barn-challenge/TD3
+python train_td3.py --env CustomEnv2-v0 --policy TD3 --seed 0 --start_timesteps 10000 --eval_freq 5000 --max_timesteps 1000000 --save_model
+
+
+1. 设置ROS导航环境
+
+如果你已经有一个ROS导航环境，通常包括以下组件：
+
+    机器人模型：使用Gazebo或其他仿真工具运行的机器人模型。
+    传感器：如LIDAR、IMU、相机等，用于感知环境。
+    导航堆栈：包括路径规划器、局部规划器、控制器等，用于导航和避障。
+
+2. 设计强化学习环境接口
+
+你需要为ROS导航环境创建一个强化学习环境接口，将TD3算法与ROS环境连接起来。这个接口的关键部分包括：
+
+    状态获取：
+        从ROS话题或服务中获取机器人状态信息，如位置、速度、等。
+    动作执行：
+        TD3算法输出的动作（调整后的速度）通过ROS话题发布给机器人控制器，如/cmd_vel，让机器人执行动作。
+    奖励计算：
+        根据机器人当前的状态和目标轨迹计算奖励。例如，可以订阅 /odom 话题来获取机器人当前位置，与目标位置比较来计算误差，然后基于误差计算奖励。
+    终止条件：
+        当机器人到达目标位置或发生碰撞等情况时，设置为任务结束。
+
+3. 实现强化学习算法
+
+在设计好接口后，你可以通过强化学习框架（如TensorFlow、PyTorch）实现TD3算法。你需要：
+
+    初始化TD3网络：初始化Actor和Critic网络及其目标网络。
+    收集交互数据：通过ROS接口，收集机器人与环境的交互数据（状态，动作，奖励，下一状态）。
+    网络训练：使用收集的数据，更新TD3网络参数。
+    策略更新：定期更新Actor网络，生成更好的动作（速度指令）。
+
+4. ROS与TD3算法的集成
+
+你需要创建一个ROS节点来运行TD3算法，并且该节点需要与ROS的其他部分（如控制器、传感器）通信。关键步骤如下：
+
+    创建ROS节点：在Python或C++中创建一个ROS节点，加载TD3算法并实现训练和推理。
+    订阅与发布：订阅机器人状态话题（如/odom、/scan），并发布控制指令（如/cmd_vel）。
+    运行训练：在仿真环境中运行TD3算法，通过与环境的不断交互，优化自适应控制器。
+    数据存储：存储每次训练的模型和参数，以便后续使用或微调。
+
+5. 测试与部署
+
+在仿真中反复测试TD3算法，并通过调试ROS节点，确保算法输出的速度指令能够有效改善机器人导航性能。在仿真效果满意后，可以考虑将其部署到实际机器人中进行实地测试。
+
+
+
+
+All navigation  until current, times: [26.383, 24.113, 90.512, 200.0, 200.0, 57.098000000000006, 200.0, 200.0, 200.0, 200.0, 69.107, 200.0, 200.0, 200.0, 59.833, 200.0, 68.63499999999999, 200.0, 200.0, 200.0, 42.728, 75.981, 67.23700000000001, 200.0, 200.0, 62.97, 200.0, 43.802, 86.896, 81.795, 200.0, 200.0, 97.37199999999999, 54.43299999999999, 200.0, 200.0, 69.881, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 22.263, 22.508, 22.983999999999998, 22.58, 21.887, 200.0, 200.0, 200.0, 41.973, 200.0, 200.0, 89.147, 40.16, 22.154000000000003, 31.069000000000003, 25.630000000000003, 30.395000000000003, 30.607, 30.538999999999998, 30.661, 34.425, 47.346999999999994, 200.0, 28.769, 38.975, 60.937000000000005, 200.0, 38.873, 42.525, 56.546, 24.796, 25.35, 22.674, 200.0, 200.0, 66.31400000000001, 25.597, 24.7, 200.0, 76.193, 42.396, 200.0, 200.0, 44.585, 200.0, 50.657, 200.0, 44.824, 92.959, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 37.56399999999999, 200.0, 32.717, 35.407999999999994, 200.0, 25.171, 24.117, 56.340999999999994, 61.408, 48.102000000000004, 27.748, 26.483, 36.733, 29.793000000000003, 42.409000000000006, 34.716, 33.715, 200.0, 61.849000000000004, 69.335, 200.0, 200.0, 200.0, 44.86, 46.29, 48.17400000000001, 35.363, 200.0, 200.0, 50.887, 200.0, 200.0, 200.0, 200.0, 200.0, 22.48, 23.236, 22.761, 23.936, 20.990000000000002, 79.712, 89.919, 47.487, 200.0, 200.0, 31.477000000000004, 37.983000000000004, 31.251999999999995, 26.123, 31.366, 200.0, 200.0, 28.257999999999996, 63.9, 47.753, 200.0, 200.0, 200.0, 87.744, 200.0, 37.501999999999995, 39.794000000000004, 28.834999999999997, 25.473, 36.021, 49.788, 200.0, 200.0, 42.888, 200.0, 200.0, 33.617, 25.624000000000002, 32.376, 200.0, 200.0, 47.839, 200.0, 200.0, 42.505, 30.811999999999998, 36.792, 37.141000000000005, 27.028, 28.566, 26.073999999999998, 24.113, 26.689, 25.299, 26.329, 52.132, 58.932, 200.0, 49.638999999999996, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 26.716, 49.545, 200.0, 200.0, 78.702, 200.0, 29.000999999999998, 30.669, 21.649, 29.356, 52.31, 33.461, 40.454, 45.061, 69.924, 200.0, 28.659999999999997, 200.0, 200.0, 200.0, 96.077, 200.0, 200.0, 200.0, 200.0, 19.44, 36.233000000000004, 33.388, 28.951, 21.285999999999998, 28.305999999999997, 41.696, 61.64999999999999, 28.368, 34.499, 200.0, 200.0, 200.0, 200.0, 99.847, 200.0, 200.0, 28.804, 200.0, 200.0, 61.27, 200.0, 200.0, 46.919000000000004, 41.919000000000004, 73.92999999999999, 200.0, 200.0, 80.575, 73.15, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 45.9, 27.189999999999998, 200.0, 80.45400000000001, 200.0, 43.888999999999996, 44.181000000000004, 43.266999999999996, 200.0, 52.668000000000006, 58.562999999999995, 45.419, 200.0, 54.717, 44.634, 200.0, 200.0, 200.0, 50.513000000000005, 68.268, 200.0, 200.0, 200.0, 200.0, 200.0, 58.512, 200.0, 38.534000000000006, 200.0, 200.0, 200.0, 74.77499999999999, 200.0, 200.0, 32.129000000000005, 54.361, 28.938, 25.578, 27.424999999999997, 73.971, 35.906, 62.815000000000005, 77.74600000000001, 90.661, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 32.876000000000005, 59.270999999999994, 200.0, 200.0, 200.0, 88.471, 99.217, 200.0, 200.0, 200.0, 67.28200000000001]
+
+
+
+All navigation  until current, times: [200.0, 28.195, 70.97, 32.343, 41.95399999999999, 37.745, 33.007, 25.179000000000002, 44.547000000000004, 73.381, 37.211999999999996, 32.757, 35.003, 38.068000000000005, 29.535000000000004, 35.81, 29.89, 89.268, 28.519, 24.596999999999998, 56.172, 34.845000000000006, 33.968, 41.729, 29.833999999999996, 29.897999999999996, 200.0, 82.904, 46.416, 39.634, 40.129000000000005, 35.894, 47.032, 58.07899999999999, 33.542, 41.459, 39.992, 50.227999999999994, 32.892, 200.0, 39.328, 34.92, 36.215999999999994, 44.543, 42.998, 36.666000000000004, 33.17, 39.417, 28.473, 59.043000000000006, 47.396, 32.741, 37.735, 36.898, 27.757, 24.826, 36.018, 26.717, 44.428, 31.573, 36.69, 29.732, 200.0, 24.008000000000003, 33.251, 39.248999999999995, 30.223, 24.195, 21.701, 23.987, 200.0, 35.946000000000005, 39.979, 22.277, 81.066, 26.403, 23.947, 24.761, 22.509999999999998, 23.423000000000002, 25.486, 23.313, 26.056, 20.317, 21.231, 31.848999999999997, 25.759, 26.275, 23.067, 30.583000000000002, 36.975, 41.502, 22.003, 48.88, 26.839999999999996, 19.122, 23.817, 51.837999999999994, 22.166, 27.666, 27.476, 24.869, 28.901000000000003, 21.765, 23.695, 18.627000000000002, 26.939, 200.0, 29.637999999999998, 26.5, 21.220000000000002, 24.402, 42.126000000000005, 54.326, 30.97, 22.999000000000002, 23.028, 26.48, 24.072, 29.592000000000002, 23.126, 23.669, 24.033, 25.697000000000003, 29.568, 22.607, 27.487000000000002, 36.748000000000005, 26.387999999999998, 24.125999999999998, 25.816, 36.778999999999996, 28.21, 53.806000000000004, 27.55, 36.994, 26.367, 38.512, 32.409000000000006, 29.768, 25.586, 31.349000000000004, 30.587000000000003, 32.257, 20.619, 31.857, 28.682999999999996, 200.0, 21.756, 200.0, 32.564, 50.927, 20.215000000000003, 53.715, 50.601, 39.488, 55.791000000000004, 29.854, 41.303000000000004, 43.159, 38.173, 33.592, 29.177, 36.138, 24.348, 22.484, 21.851, 26.899, 28.662, 24.512999999999998, 27.433999999999997, 22.953, 41.352000000000004, 27.794000000000004, 47.946, 46.817, 33.3, 29.349000000000004, 26.442, 24.483, 35.768, 28.031999999999996, 24.164, 60.425999999999995, 30.617, 31.326, 28.036, 39.635000000000005, 38.048, 27.644000000000002, 23.907, 23.582, 33.104, 21.191, 200.0, 43.132000000000005, 25.337, 29.028, 31.999, 19.924, 23.924, 22.482, 25.141000000000002, 34.715, 26.524, 30.646, 22.96, 21.650999999999996, 22.554000000000002, 62.94, 23.39, 26.159000000000002, 21.429, 49.167, 26.093, 22.192, 35.299, 28.227000000000004, 27.052, 47.67, 28.770000000000003, 45.232, 21.581000000000003, 30.221999999999998, 40.461, 25.400000000000002, 28.259, 23.759, 32.476, 25.151, 27.278, 46.315000000000005, 33.327, 30.034000000000002, 200.0, 36.026, 32.501000000000005, 23.785000000000004, 25.933, 20.242, 49.816, 200.0, 29.347, 32.893, 30.374000000000002, 22.29, 29.141, 29.685000000000002, 25.092, 27.933, 28.614000000000004, 22.83, 19.707, 29.267000000000003, 30.073, 21.477999999999998, 32.935, 49.618, 48.443000000000005, 42.349999999999994]
+Starting navigation for world 62, repetition 261/5
+>>>>>>>>>>>>>>>>>> Loading Gazebo Simulation with BARN/world_62.world <<<<<<<<<<<<<<<<<<
+
+[ INFO] [1723960267.133841896]: waitForService: Service [/gazebo/set_physics_properties] has not been advertised, waiting...
+[ WARN] [1723960267.500675077]: Shutdown request received.
+[ WARN] [1723960267.500709352]: Reason given for shutdown: [[/urdf_spawner] Reason: new node registered with same name]
+Couldn't find a preferred IP via the getifaddrs() call; I'm assuming that your IP address is 127.0.0.1.  This should work for local processes, but will almost certainly not work if you have remote processes.Report to the disc-zmq development team to seek a fix.
+Couldn't find a preferred IP via the getifaddrs() call; I'm assuming that your IP address is 127.0.0.1.  This should work for local processes, but will almost certainly not work if you have remote processes.Report to the disc-zmq development team to seek a fix.
+Couldn't find a preferred IP via the getifaddrs() call; I'm assuming that your IP address is 127.0.0.1.  This should work for local processes, but will almost certainly not work if you have remote processes.Report to the disc-zmq development team to seek a fix.
+Couldn't find a preferred IP via the getifaddrs() call; I'm assuming that your IP address is 127.0.0.1.  This should work for local processes, but will almost certainly not work if you have remote processes.Report to the disc-zmq development team to seek a fix.
+
+
+source venv/bin/activate
+source ~/jackal_ws1/devel/setup.bash
+cd ~/jackal_ws1/src/the-barn-challenge/
+python trained_nav.py --laser --gui
+
+
+
+
+cd ~/jackal_ws1/src/the-barn-challenge
+source ../../devel/setup.bash
+python3 run_test62.py --laser
+
+source venv/bin/activate
+source ~/jackal_ws1/devel/setup.bash
+cd ~/jackal_ws1/src/the-barn-challenge/TD3
+python train_td3.py --env CustomEnv2-v0 --policy TD3 --seed 0 --start_timesteps 10000 --eval_freq 5000 --max_timesteps 1000000 --save_model
+
