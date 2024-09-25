@@ -4,7 +4,7 @@
 
 This project aims to improve the accuracy of autonomous mobile robot navigation by creating an adaptive controller that reduces the discrepancies between expected and actual actions. The project uses reinforcement learning to add a correction term to the original planning twist command. The Jackal robot is used in this project, and the framework is based on the Benchmark Autonomous Robot Navigation (BARN) Challenge.
 
-## Table of Contents
+## Contents
 - [Background](#background)
 - [Research Purpose](#research-purpose)
 - [Methodology](#methodology)
