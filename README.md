@@ -70,3 +70,27 @@ The adaptive controller demonstrated significant improvements in navigation perf
    catkin_make
    source devel/setup.bash
     ```
+## Usage
+
+1. Launch the simulation:
+   ```bash
+   git clone https://github.com/zcccc-keven/adaptive-controller-for-jackal.git
+    ```
+   
+2. Train the controller using reinforcement learning:
+   ```bash
+   cd /TD3
+   python train_td3.py --env CustomEnv2-v0 --policy TD3 --seed 0 --start_timesteps 10000 --eval_freq 5000 --max_timesteps 1000000 --save_model
+    ```
+   
+3. Test the trained controller:
+    ```bash
+   git clone https://github.com/zcccc-keven/adaptive-controller-for-jackal.git
+    ```   
+
+## Acknowledgements
+
+This project builds on several existing frameworks and repositories:
+
+    BARN Challenge: The project heavily relies on the framework and setup provided by the BARN Challenge repository, which focuses on testing and improving autonomous navigation systems.
+    TD3 (Twin Delayed Deep Deterministic Policy Gradient): The TD3 algorithm used for reinforcement learning in this project is based on the implementation from [sfujim/TD3](https://github.com/sfujim/TD3). The TD3 framework provides the reinforcement learning backbone for training the adaptive controller in the simulation environment.
