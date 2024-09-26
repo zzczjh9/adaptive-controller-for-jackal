@@ -4,22 +4,11 @@
 
 This project aims to improve the accuracy of autonomous mobile robot navigation by creating an adaptive controller that reduces the discrepancies between expected and actual actions. The project uses reinforcement learning to add a correction term to the original planning twist command. The Jackal robot is used in this project, and the framework is based on the Benchmark Autonomous Robot Navigation (BARN) Challenge.
 
-## Contents
-- [Background](#background)
-- [Research Purpose](#research-purpose)
-- [Methodology](#methodology)
-- [System Setup](#system-setup)
-- [Training Process](#training-process)
-- [Training Results](#training-results)
-- [Installation](#installation)
-- [Usage](#usage)
-- [License](#license)
-
 ## Background
 
 - The navigation of mobile robots relies on precision in following planned trajectories to ensure accuracy. However, discrepancies in control outputs can lead to significant deviations from planned paths.
 - The project employs the Jackal robot, equipped with 2D LiDAR, to navigate both pre-generated and novel environments from the BARN dataset.
-- Various navigation strategies are employed, including Dynamic Window Approach (DWA), Fast DWA, and reinforcement learning-based methods like APPLR.
+- Various navigation strategies are employed, including Dynamic Window Approach (DWA), and Time Elastic Band (TEB).
 
 ## Research Purpose
 
@@ -74,12 +63,16 @@ The adaptive controller demonstrated significant improvements in navigation perf
 
 1. Launch the simulation:
    ```bash
-   git clone https://github.com/zcccc-keven/adaptive-controller-for-jackal.git
+   cd ~/jackal_ws/src/the-barn-challenge
+   source ../../devel/setup.bash
+   python3 run_test62.py --laser
     ```
    
 2. Train the controller using reinforcement learning:
    ```bash
-   cd /TD3
+   source venv/bin/activate
+   source ~/jackal_ws1/devel/setup.bash
+   cd ~/jackal_ws1/src/the-barn-challenge/TD3
    python train_td3.py --env CustomEnv2-v0 --policy TD3 --seed 0 --start_timesteps 10000 --eval_freq 5000 --max_timesteps 1000000 --save_model
     ```
    
