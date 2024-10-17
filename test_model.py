@@ -11,7 +11,7 @@ from sensor_msgs.msg import LaserScan
 from gazebo_simulation import GazeboSimulation
 import torch
 import torch.nn as nn
-# Define the Actor model class (add this part to your test script)
+
 class Actor(nn.Module):
     def __init__(self, state_dim, action_dim, max_action):
         super(Actor, self).__init__()
@@ -28,8 +28,8 @@ class Actor(nn.Module):
 
 # Update the state_dim to the correct size
 state_dim = 724
-action_dim = 2   # Assuming two actions (linear and angular velocities)
-max_action = 1.0 # Assuming action space is normalized, adjust as necessary
+action_dim = 2   #Two actions (linear and angular velocities)
+max_action = 1.0 
 
 actor_model = Actor(state_dim, action_dim, max_action)
 # Constants
@@ -41,7 +41,7 @@ teb_velocities = []
 teb_last_timestep = None
 last_scan_data = None
 
-# Load the trained actor model
+# Load the trained actor model(use your file path)
 actor_model_path = '/home/z/jackal_ws1/src/the-barn-challenge/TD3/models/TD3_CustomEnv2-v0_0_actor'
 
 actor_model.eval()
