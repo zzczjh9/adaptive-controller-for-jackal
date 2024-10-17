@@ -4,13 +4,7 @@
 
 This project aims to improve the accuracy of autonomous mobile robot navigation by creating an adaptive controller that reduces the discrepancies between expected and actual actions. The project uses reinforcement learning to add a correction term to the original planning twist command. The Jackal robot is used in this project, and the framework is based on the Benchmark Autonomous Robot Navigation (BARN) Challenge.
 
-## Background
-
-- The navigation of mobile robots relies on precision in following planned trajectories to ensure accuracy. However, discrepancies in control outputs can lead to significant deviations from planned paths.
-- The project employs the Jackal robot, equipped with 2D LiDAR, to navigate both pre-generated and novel environments from the BARN dataset.
-- Various navigation strategies are employed, including Dynamic Window Approach (DWA), and Time Elastic Band (TEB).
-
-## Research Purpose
+## Purpose
 
 - **Main Goal:** Develop an adaptive controller to enhance trajectory accuracy by separating planning and control processes.
 - **Strategy:** Train a neural network using reinforcement learning to add a correction term to the original planning twist command, reducing the deviation between expected and actual actions.
@@ -28,12 +22,6 @@ This project aims to improve the accuracy of autonomous mobile robot navigation 
 - **Simulation Environment:** Utilizes ROS and Gazebo to simulate real-world robotics scenarios. A custom script based on the BARN Challenge is used for testing.
 - **ROS Communication:** ROS publishers and subscribers handle movement commands and sensor data integration.
 - **Integration with OpenAI Gym:** The simulation environment is compatible with OpenAI Gym for training and testing the adaptive controller.
-
-## Training Process
-
-- **Feedback Loop:** Robot actions are adjusted in real-time based on sensor feedback and neural network predictions.
-- **Adaptive Learning:** The system adapts its strategy based on accumulated experience, improving navigation performance over time.
-- **Reward Design:** The reward function penalizes large deviations and rewards improvements in local progress toward the goal.
 
 ## Training Results
 
@@ -78,7 +66,7 @@ The adaptive controller demonstrated significant improvements in navigation perf
    
 3. Test the trained controller:
     ```bash
-   git clone https://github.com/zcccc-keven/adaptive-controller-for-jackal.git
+  python3 model_test.py
     ```   
 
 ## Acknowledgements
