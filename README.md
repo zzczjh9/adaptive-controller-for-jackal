@@ -65,10 +65,9 @@ The adaptive controller demonstrated significant improvements in navigation perf
     ```
    
 3. Test the trained controller:
-    ```bash
-  python3 model_test.py
-    ```   
-
+   ```bash
+   python3 model_test.py
+    ```
 ## Acknowledgements
 
 This project builds on several existing frameworks and repositories:
