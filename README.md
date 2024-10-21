@@ -36,7 +36,7 @@ The adaptive controller demonstrated significant improvements in navigation perf
 
 ## Installation
 
-1. Follow the instruction athttps:
+1. Follow the instruction at:
    ```bash
    https://github.com/Daffan/ros_jackal/tree/main
     ```
