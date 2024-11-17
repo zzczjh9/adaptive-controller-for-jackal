@@ -25,7 +25,8 @@ This project aims to improve the accuracy of autonomous mobile robot navigation 
 
 ## Navigation Simulation
 
-- Start ![[start.jpg]]
+- Start
+![[start.jpg]]
 - In process
 - Goal reached
 
