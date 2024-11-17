@@ -26,9 +26,9 @@ This project aims to improve the accuracy of autonomous mobile robot navigation 
 ## Navigation Simulation
 
 <p align="center">
-  <img src="start.png" alt="Image 1" width="200"/>
-  <img src="in process.png" alt="Image 2" width="200"/>
-  <img src="goal reached.png" alt="Image 3" width="200"/>
+  <img src="start.jpg" alt="Start" width="200"/>
+  <img src="in process.jpg" alt="In Process" width="200"/>
+  <img src="goal reached.jpg" alt="Goal Reached" width="200"/>
 </p>
 
 
