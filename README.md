@@ -23,6 +23,12 @@ This project aims to improve the accuracy of autonomous mobile robot navigation 
 - **ROS Communication:** ROS publishers and subscribers handle movement commands and sensor data integration.
 - **Integration with OpenAI Gym:** The simulation environment is compatible with OpenAI Gym for training and testing the adaptive controller.
 
+## Navigation Simulation
+
+- Start ![[start.jpg]]
+- In process
+- Goal reached
+
 ## Training Results
 
 | Method              | Success Rate | Average Navigation Time (seconds) |
